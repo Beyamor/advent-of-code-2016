@@ -36,10 +36,10 @@ pub fn clamp<T>(v:T, min:T, max:T) -> T where T: Ord {
     return cmp::min(cmp::max(v, min), max);
 }
 
-static KEYS:&'static[[i32; 3]; 3] = &[
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
+static KEYS:&'static[[char; 3]; 3] = &[
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9']
 ];
 
 impl Position {
@@ -63,11 +63,11 @@ impl Position {
         return dirs.iter().fold(*self, |pos, dir| { pos.make_move(dir) });
     }
 
-    fn get_key(&self) -> i32 {
+    fn get_key(&self) -> char {
         KEYS[self.y as usize][self.x as usize]
     }
 
-    fn from_key(key:i32) -> Position {
+    fn from_key(key:char) -> Position {
         for y in 0..3 {
             for x in 0..3 {
                 if KEYS[y as usize][x as usize] == key {
@@ -90,7 +90,7 @@ pub fn parse_moves(s:&String) -> Vec<Vec<Direction>> {
         .collect()
 }
 
-pub fn get_keys(start:&Position, moves:&Vec<Vec<Direction>>) -> Vec<i32> {
+pub fn get_keys(start:&Position, moves:&Vec<Vec<Direction>>) -> Vec<char> {
     let mut position = *start;
     let mut keys = vec![];
     for set_of_moves in moves {
@@ -107,7 +107,7 @@ fn main() {
     f.read_to_string(&mut contents).expect("Unable to read contents");
     let moves = parse_moves(&contents);
 
-    let keys = get_keys(&Position::from_key(5), &moves);
+    let keys = get_keys(&Position::from_key('5'), &moves);
     print!("Keys: ");
     for key in keys {
         print!("{}", key);
@@ -139,15 +139,15 @@ mod tests {
     fn test_getting_keys() {
         let get_key = |x:i32, y:i32| Position{ x: x, y: y}.get_key();
 
-        assert_eq!(1, get_key(0, 0));
-        assert_eq!(2, get_key(1, 0));
-        assert_eq!(3, get_key(2, 0));
-        assert_eq!(4, get_key(0, 1));
-        assert_eq!(5, get_key(1, 1));
-        assert_eq!(6, get_key(2, 1));
-        assert_eq!(7, get_key(0, 2));
-        assert_eq!(8, get_key(1, 2));
-        assert_eq!(9, get_key(2, 2));
+        assert_eq!('1', get_key(0, 0));
+        assert_eq!('2', get_key(1, 0));
+        assert_eq!('3', get_key(2, 0));
+        assert_eq!('4', get_key(0, 1));
+        assert_eq!('5', get_key(1, 1));
+        assert_eq!('6', get_key(2, 1));
+        assert_eq!('7', get_key(0, 2));
+        assert_eq!('8', get_key(1, 2));
+        assert_eq!('9', get_key(2, 2));
     }
 
     #[test]
@@ -156,7 +156,7 @@ mod tests {
         let moved_pos = pos.make_move(&Direction::U);
         assert_eq!(
             moved_pos.get_key(),
-            2);
+            '2');
     }
 
     #[test]
@@ -169,23 +169,23 @@ mod tests {
     #[test]
     fn test_examples() {
         assert_eq!(
-            1,
-            Position::from_key(5)
+            '1',
+            Position::from_key('5')
             .make_moves(&vec![Direction::U, Direction::L, Direction::L])
             .get_key());
         assert_eq!(
-            9,
-            Position::from_key(1)
+            '9',
+            Position::from_key('1')
             .make_moves(&vec![Direction::R, Direction::R, Direction::D, Direction::D, Direction::D])
             .get_key());
         assert_eq!(
-            8,
-            Position::from_key(9)
+            '8',
+            Position::from_key('9')
             .make_moves(&vec![Direction::L, Direction::U, Direction::R, Direction::D, Direction::L])
             .get_key());
         assert_eq!(
-            5,
-            Position::from_key(8)
+            '5',
+            Position::from_key('8')
             .make_moves(&vec![Direction::U, Direction::U, Direction::U, Direction::U, Direction::D])
             .get_key());
     }
