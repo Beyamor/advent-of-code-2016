@@ -5,6 +5,6 @@ authors = ["Tom Gibson <beyamor@gmail.com>"]
 
 [[bin]]
 name = "day1"
-path = "src/day1.rs"
+path = "src/day1/main.rs"
 
 [dependencies]
