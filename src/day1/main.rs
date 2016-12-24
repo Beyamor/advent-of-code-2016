@@ -1,8 +1,9 @@
 use std::env;
 use std::fs::File;
 use std::io::Read;
+use std::collections::HashSet;
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Hash)]
 pub struct Point {
     x: i32,
     y: i32
@@ -22,7 +23,7 @@ pub struct State {
     direction: Direction
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum Turn {
     Left,
     Right
@@ -93,17 +94,6 @@ pub fn manhattan_distance(p1:&Point, p2:&Point) -> i32 {
     return (p2.x - p1.x).abs() + (p2.y - p1.y).abs();
 }
 
-pub fn calculate_distance(movs:&Vec<Move>) -> i32 {
-    let start = State {
-        coordinates: Point { x: 0, y: 0 },
-        direction: Direction::North
-    };
-
-    let end = make_moves(&start, movs);
-
-    return manhattan_distance(&start.coordinates, &end.coordinates);
-}
-
 pub fn parse_move(s:&String) -> Result<Move, String> {
     let mut chars = s.chars();
 
@@ -134,14 +124,53 @@ pub fn parse_moves(s:&String) -> Result<Vec<Move>, String> {
     return Ok(moves);
 }
 
+pub fn calculate_distance(movs:&Vec<Move>) -> i32 {
+    let start = State {
+        coordinates: Point { x: 0, y: 0 },
+        direction: Direction::North
+    };
+
+    let end = make_moves(&start, movs);
+
+    return manhattan_distance(&start.coordinates, &end.coordinates);
+}
+
+pub fn calculate_distance2(movs:&Vec<Move>) -> Option<i32> {
+    let mut state = State {
+        coordinates: Point { x: 0, y: 0 },
+        direction: Direction::North
+    };
+
+    let mut visited_coordinates = HashSet::new();
+    let start = state.coordinates;
+    visited_coordinates.insert(start);
+
+    for mov in movs {
+        let new_direction = make_turn(&state.direction, &mov.turn);
+        for _ in 0..mov.blocks {
+            let new_coordintes = move_forward(&state.coordinates, &new_direction, &1);
+
+            if visited_coordinates.contains(&new_coordintes) {
+                let distance = manhattan_distance(&start, &new_coordintes);
+                return Some(distance);
+            }
+            visited_coordinates.insert(new_coordintes);
+
+            state = State { direction: new_direction, coordinates: new_coordintes };
+        }
+    }
+
+    return None;
+}
+
 fn main() {
     let file = env::args().nth(1).expect("Specify an input file");
     let mut contents = String::new();
     let mut f = File::open(file).expect("Unable to open file");
     f.read_to_string(&mut contents).expect("Unable to read contents");
-
     let moves = parse_moves(&contents).expect("Unable to parse moves");
-    let distance = calculate_distance(&moves);
+
+    let distance = calculate_distance2(&moves).expect("No point visited twice");
     println!("Distance: {}", distance);
 }
 
@@ -214,5 +243,12 @@ mod tests {
         assert_eq!(
             calculate_distance(&parse_moves(&"R5, L5, R5, R3".to_string()).unwrap()),
             12);
+    }
+
+    #[test]
+    fn test_part2_examples2() {
+        assert_eq!(
+            calculate_distance2(&parse_moves(&"R8, R4, R4, R8".to_string()).unwrap()).unwrap(),
+            4);
     }
 }
