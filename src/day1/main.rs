@@ -1,3 +1,7 @@
+use std::env;
+use std::fs::File;
+use std::io::Read;
+
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct Point {
     x: i32,
@@ -42,9 +46,9 @@ pub fn right(direction:&Direction) -> Direction {
 pub fn left(direction:&Direction) -> Direction {
     match *direction {
         Direction::North => Direction::West,
-        Direction::East => Direction::North,
+        Direction::West => Direction::South,
         Direction::South => Direction::East,
-        Direction::West => Direction::North
+        Direction::East => Direction::North
     }
 }
 
@@ -128,6 +132,17 @@ pub fn parse_moves(s:&String) -> Result<Vec<Move>, String> {
         }
     }
     return Ok(moves);
+}
+
+fn main() {
+    let file = env::args().nth(1).expect("Specify an input file");
+    let mut contents = String::new();
+    let mut f = File::open(file).expect("Unable to open file");
+    f.read_to_string(&mut contents).expect("Unable to read contents");
+
+    let moves = parse_moves(&contents).expect("Unable to parse moves");
+    let distance = calculate_distance(&moves);
+    println!("Distance: {}", distance);
 }
 
 #[cfg(test)]
