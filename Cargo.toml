@@ -1,0 +1,10 @@
+[package]
+name = "advent-of-code-2016"
+version = "0.1.0"
+authors = ["Tom Gibson <beyamor@gmail.com>"]
+
+[[bin]]
+name = "day1"
+path = "src/day1.rs"
+
+[dependencies]
