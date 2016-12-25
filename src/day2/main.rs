@@ -36,26 +36,39 @@ pub fn clamp<T>(v:T, min:T, max:T) -> T where T: Ord {
     return cmp::min(cmp::max(v, min), max);
 }
 
-static KEYS:&'static[[char; 3]; 3] = &[
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9']
+static KEYS:&'static[[Option<char>; 5]; 5] = &[
+    [None, None, Some('1'), None, None],
+    [None, Some('2'), Some('3'), Some('4'), None],
+    [Some('5'), Some('6'), Some('7'), Some('8'), Some('9')],
+    [None, Some('A'), Some('B'), Some('C'), None],
+    [None, None, Some('D'), None, None]
 ];
+
+fn get_key_at_position(x:i32, y:i32) -> Option<char> {
+    if x < 0 || x >= 5 || y < 0 || y >= 5 {
+        return None;
+    }
+
+    return KEYS[y as usize][x as usize];
+}
 
 impl Position {
     fn make_move(&self, direction:&Direction) -> Position {
-        Position {
-            x: clamp(self.x + match *direction {
-                Direction::L => -1,
-                Direction::R => 1,
-                _ => 0
-            }, 0, 2),
+        let new_x = self.x + match *direction {
+            Direction::L => -1,
+            Direction::R => 1,
+            _ => 0
+        };
 
-            y: clamp(self.y + match *direction {
-                Direction::U => -1,
-                Direction::D => 1,
-                _ => 0
-            }, 0, 2)
+        let new_y = self.y + match *direction {
+            Direction::U => -1,
+            Direction::D => 1,
+            _ => 0
+        };
+
+        match get_key_at_position(new_x, new_y) {
+            Some(_) => Position { x: new_x, y: new_y },
+            None => *self
         }
     }
 
@@ -64,13 +77,13 @@ impl Position {
     }
 
     fn get_key(&self) -> char {
-        KEYS[self.y as usize][self.x as usize]
+        get_key_at_position(self.x, self.y).unwrap()
     }
 
     fn from_key(key:char) -> Position {
         for y in 0..3 {
             for x in 0..3 {
-                if KEYS[y as usize][x as usize] == key {
+                if KEYS[y as usize][x as usize] == Some(key) {
                     return Position { x: x, y: y};
                 }
             }
@@ -135,20 +148,21 @@ mod tests {
             "R".to_string().parse::<Direction>());
     }
 
-    #[test]
-    fn test_getting_keys() {
-        let get_key = |x:i32, y:i32| Position{ x: x, y: y}.get_key();
+    // From part 1
+    //#[test]
+    //fn test_getting_keys() {
+    //    let get_key = |x:i32, y:i32| Position{ x: x, y: y}.get_key();
 
-        assert_eq!('1', get_key(0, 0));
-        assert_eq!('2', get_key(1, 0));
-        assert_eq!('3', get_key(2, 0));
-        assert_eq!('4', get_key(0, 1));
-        assert_eq!('5', get_key(1, 1));
-        assert_eq!('6', get_key(2, 1));
-        assert_eq!('7', get_key(0, 2));
-        assert_eq!('8', get_key(1, 2));
-        assert_eq!('9', get_key(2, 2));
-    }
+    //    assert_eq!('1', get_key(0, 0));
+    //    assert_eq!('2', get_key(1, 0));
+    //    assert_eq!('3', get_key(2, 0));
+    //    assert_eq!('4', get_key(0, 1));
+    //    assert_eq!('5', get_key(1, 1));
+    //    assert_eq!('6', get_key(2, 1));
+    //    assert_eq!('7', get_key(0, 2));
+    //    assert_eq!('8', get_key(1, 2));
+    //    assert_eq!('9', get_key(2, 2));
+    //}
 
     #[test]
     fn test_moving_position() {
@@ -166,29 +180,30 @@ mod tests {
         assert_eq!(2, clamp(3, 0, 2));
     }
 
-    #[test]
-    fn test_examples() {
-        assert_eq!(
-            '1',
-            Position::from_key('5')
-            .make_moves(&vec![Direction::U, Direction::L, Direction::L])
-            .get_key());
-        assert_eq!(
-            '9',
-            Position::from_key('1')
-            .make_moves(&vec![Direction::R, Direction::R, Direction::D, Direction::D, Direction::D])
-            .get_key());
-        assert_eq!(
-            '8',
-            Position::from_key('9')
-            .make_moves(&vec![Direction::L, Direction::U, Direction::R, Direction::D, Direction::L])
-            .get_key());
-        assert_eq!(
-            '5',
-            Position::from_key('8')
-            .make_moves(&vec![Direction::U, Direction::U, Direction::U, Direction::U, Direction::D])
-            .get_key());
-    }
+    // From part 1
+    //#[test]
+    //fn test_examples() {
+    //    assert_eq!(
+    //        '1',
+    //        Position::from_key('5')
+    //        .make_moves(&vec![Direction::U, Direction::L, Direction::L])
+    //        .get_key());
+    //    assert_eq!(
+    //        '9',
+    //        Position::from_key('1')
+    //        .make_moves(&vec![Direction::R, Direction::R, Direction::D, Direction::D, Direction::D])
+    //        .get_key());
+    //    assert_eq!(
+    //        '8',
+    //        Position::from_key('9')
+    //        .make_moves(&vec![Direction::L, Direction::U, Direction::R, Direction::D, Direction::L])
+    //        .get_key());
+    //    assert_eq!(
+    //        '5',
+    //        Position::from_key('8')
+    //        .make_moves(&vec![Direction::U, Direction::U, Direction::U, Direction::U, Direction::D])
+    //        .get_key());
+    //}
 
     #[test]
     fn test_parsing_moves() {
